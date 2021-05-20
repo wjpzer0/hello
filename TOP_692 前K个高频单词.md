@@ -38,6 +38,61 @@
 
 未解出，对多层排序无法很好的应用！
 
+### 使用「哈希表」&「优先队列」
+
+- 使用「哈希表」来统计所有的词频
+
+- 构建大小为 k 按照「词频升序 + (词频相同)字典序倒序」的优先队列：
+  - 如果词频不相等，根据词频进行升序构建，确保堆顶元素是堆中词频最小的元素
+  - 如果词频相等，根据字典序大小进行倒序构建，结合 2.1 可以确保堆顶元素是堆中「词频最小 & 字典序最大」的元素
+  
+- 对所有元素进行遍历，尝试入堆：
+  - 堆内元素不足 k 个：直接入堆
+  - 词频大于堆顶元素：堆顶元素不可能是前 k 大的元素。将堆顶元素弹出，并将当前元素添加到堆中
+  - 词频小于堆顶元素；当前元素不可能是前 k 大的元素，直接丢弃。
+  - 词频等于堆顶元素：根据当前元素与堆顶元素的字典序大小决定（如果字典序大小比堆顶元素要小则入堆）
+  
+- 输出堆内元素，并翻转
+
+  ```java
+  class Solution {
+      public List<String> topKFrequent(String[] ws, int k) {
+          Map<String, Integer> map = new HashMap<>();
+          for (String w : ws) map.put(w, map.getOrDefault(w, 0) + 1);
+          PriorityQueue<Object[]> q = new PriorityQueue<>(k, (a, b)->{ 
+              // 如果词频不同，根据词频升序
+              int c1 = (Integer)a[0], c2 = (Integer)b[0];
+              if (c1 != c2) return c1 - c2;
+              // 如果词频相同，根据字典序倒序
+              String s1 = (String)a[1], s2 = (String)b[1];
+              return s2.compareTo(s1);
+          });
+          for (String s : map.keySet()) {
+              int cnt = map.get(s);
+              if (q.size() < k) { // 不足 k 个，直接入堆
+                  q.add(new Object[]{cnt, s});
+              } else {
+                  Object[] peek = q.peek();
+                  if (cnt > (Integer)peek[0]) { // 词频比堆顶元素大，弹出堆顶元素，入堆
+                      q.poll();
+                      q.add(new Object[]{cnt, s});
+                  } else if (cnt == (Integer)peek[0]) { // 词频与堆顶元素相同
+                      String top = (String)peek[1];
+                      if (s.compareTo(top) < 0) { // 且字典序大小比堆顶元素小，弹出堆顶元素，入堆
+                          q.poll();
+                          q.add(new Object[]{cnt, s});
+                      }
+                  }
+              }
+          }
+          List<String> ans = new ArrayList<>();
+          while (!q.isEmpty()) ans.add((String)q.poll()[1]);
+          Collections.reverse(ans);
+          return ans;
+      }
+  }
+  ```
+
 ## 其他解法
 
 ### 哈希表 + 排序
@@ -174,8 +229,6 @@ class Solution {
 }
 ```
 
-
-
 #### 思路及算法
 
 对于前 kk 大或前 k 小这类问题，有一个通用的解法：优先队列。优先队列可以在 O(logn) 的时间内完成插入或删除元素的操作（其中 n 为优先队列的大小），并可以 O(1) 地查询优先队列顶端元素。
@@ -187,5 +240,4 @@ class Solution {
 - 时间复杂度：O(l×n+m×llogk)，其中 nn 表示给定字符串序列的长度，m 表示实际字符串种类数，l 表示字符串的平均长度。我们需要 l×n 的时间将字符串插入到哈希表中，以及每次插入元素到优先队列中都需要 llogk 的时间，共需要插入 m 次。
 
 - 空间复杂度：O(l×(m+k))，其中 l 表示字符串的平均长度，m 表示实际字符串种类数。哈希表空间占用为 O(l×m)，优先队列空间占用为 O(l×k)。
-
 
