@@ -175,4 +175,3 @@ class Solution:
 
 - 空间复杂度：O(n)，其中 n 为数组 $\textit{citations}$ 的长度。需要创建长度为 n+1 的数组 $\textit{counter}$。
 
-
