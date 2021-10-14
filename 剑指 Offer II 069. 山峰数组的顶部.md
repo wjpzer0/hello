@@ -1,0 +1,227 @@
+# 题目
+
+符合下列属性的数组 `arr` 称为 **山峰数组**（**山脉数组）** ：
+
+- `arr.length >= 3`
+- 存在i(0 < i < arr.length - 1）使得：
+  - `arr[0] < arr[1] < ... arr[i-1] < arr[i]`
+  - `arr[i] > arr[i+1] > ... > arr[arr.length - 1]`
+
+给定由整数组成的山峰数组 `arr` ，返回任何满足 `arr[0] < arr[1] < ... arr[i - 1] < arr[i] > arr[i + 1] > ... > arr[arr.length - 1]` 的下标 `i` ，即山峰顶部。
+
+**示例 1：**
+
+```
+输入：arr = [0,1,0]
+输出：1
+```
+
+**示例 2：**
+
+```
+输入：arr = [1,3,5,4,2]
+输出：2
+```
+
+**示例 3：**
+
+```
+输入：arr = [0,10,5,2]
+输出：1
+```
+
+**示例 4：**
+
+```
+输入：arr = [3,4,5,1]
+输出：2
+```
+
+**示例 5：**
+
+```
+输入：arr = [24,69,100,99,79,78,67,36,26,19]
+输出：2
+```
+
+**提示：**
+
+- $3 <= arr.length <= 10^4$
+- $0 <= arr[i] <= 10^6$
+- 题目数据保证 `arr` 是一个山脉数组
+
+**进阶：**很容易想到时间复杂度 `O(n)` 的解决方案，你可以设计一个 `O(log(n))` 的解决方案吗？
+
+##  我的解法
+
+```python
+class Solution:
+    def peakIndexInMountainArray(self, arr: List[int]) -> int:
+        l = 0
+        r = len(arr)
+        while (l <= r):
+            mid = (r - l) // 2 + l
+            if arr[mid] > arr[mid - 1] and arr[mid] > arr[mid + 1]:
+                return mid
+            if arr[mid] > arr[mid + 1]:
+                r = mid - 1
+            elif arr[mid] < arr[mid + 1]:
+                l = mid + 1
+
+        return l
+```
+
+做过相似的题目！完美解决！
+
+### 前言
+
+虽然题目描述中说明了「我们可以返回任何满足条件的下标 i」，但由于条件为：
+$$
+\textit{arr}_0 < \textit{arr}_1 < \cdots \textit{arr}_{i-1} < \textit{arr}_i > \textit{arr}_{i+1} > \cdots > \textit{arr}_{n-1}
+$$
+其中 n 是数组 $\textit{arr}$的长度，这说明 $\textit{arr}_i$ 是数组中的最大值，并且是唯一的最大值。
+
+因此，我们需要找出的下标 i 一定是唯一的。
+
+## 其他解法
+
+### 枚举
+
+```c++
+class Solution {
+public:
+    int peakIndexInMountainArray(vector<int>& arr) {
+        int n = arr.size();
+        int ans = -1;
+        for (int i = 1; i < n - 1; ++i) {
+            if (arr[i] > arr[i + 1]) {
+                ans = i;
+                break;
+            }
+        }
+        return ans;
+    }
+};
+```
+
+```java
+class Solution {
+    public int peakIndexInMountainArray(int[] arr) {
+        int n = arr.length;
+        int ans = -1;
+        for (int i = 1; i < n - 1; ++i) {
+            if (arr[i] > arr[i + 1]) {
+                ans = i;
+                break;
+            }
+        }
+        return ans;
+    }
+}
+```
+
+```python
+class Solution:
+    def peakIndexInMountainArray(self, arr: List[int]) -> int:
+        n = len(arr)
+        ans = -1
+
+        for i in range(1, n - 1):
+            if arr[i] > arr[i + 1]:
+                ans = i
+                break
+        
+        return ans
+```
+
+#### 思路与算法
+
+我们可以对数组 $\textit{arr}$ 进行一次遍历。
+
+当我们遍历到下标 i 时，如果有 $\textit{arr}_{i-1} < \textit{arr}_i > \textit{arr}_{i+1}$，那么 i 就是我们需要找出的下标。
+
+更简单地，我们只需要让 i 满足 $\textit{arr}_i > \textit{arr}_{i+1}$即可。在遍历的过程中，我们最先遍历到的满足 $\textit{arr}_i > \textit{arr}_{i+1}$的下标 i 一定也满足$ \textit{arr}_{i-1} < \textit{arr}_i$。
+
+#### 复杂度分析
+
+- 时间复杂度：O(n)，其中 n 是数组 $\textit{arr}$ 的长度。我们最多需要对数组 $\textit{arr}$ 进行一次遍历。
+
+- 空间复杂度：O(1)。
+
+
+### 二分查找
+
+```c++
+class Solution {
+public:
+    int peakIndexInMountainArray(vector<int>& arr) {
+        int n = arr.size();
+        int left = 1, right = n - 2, ans = 0;
+        while (left <= right) {
+            int mid = (left + right) / 2;
+            if (arr[mid] > arr[mid + 1]) {
+                ans = mid;
+                right = mid - 1;
+            }
+            else {
+                left = mid + 1;
+            }
+        }
+        return ans;
+    }
+};
+```
+
+```java
+class Solution {
+    public int peakIndexInMountainArray(int[] arr) {
+        int n = arr.length;
+        int left = 1, right = n - 2, ans = 0;
+        while (left <= right) {
+            int mid = (left + right) / 2;
+            if (arr[mid] > arr[mid + 1]) {
+                ans = mid;
+                right = mid - 1;
+            } else {
+                left = mid + 1;
+            }
+        }
+        return ans;
+    }
+}
+```
+
+```python
+class Solution:
+    def peakIndexInMountainArray(self, arr: List[int]) -> int:
+        n = len(arr)
+        left, right, ans = 1, n - 2, 0
+
+        while left <= right:
+            mid = (left + right) // 2
+            if arr[mid] > arr[mid + 1]:
+                ans = mid
+                right = mid - 1
+            else:
+                left = mid + 1
+        
+        return ans
+```
+
+#### 思路与算法
+
+记满足题目要求的下标 i 为 $i_\textit{ans}$。我们可以发现：
+
+当 $i < i_\textit{ans}$时，$\textit{arr}_i < \textit{arr}_{i+1}$恒成立；
+
+当 $i \geq i_\textit{ans}$ 时，$\textit{arr}_i > \textit{arr}_{i+1}$恒成立。
+
+这与方法一的遍历过程也是一致的，因此 $i_\textit{ans}$即为「最小的满足 $\textit{arr}_i > \textit{arr}_{i+1}$的下标 i」，我们可以用二分查找的方法来找出 $i_\textit{ans}$。
+
+#### 复杂度分析
+
+- 时间复杂度：$O(\log n)$，其中 n 是数组 $\textit{arr}$ 的长度。我们需要进行二分查找的次数为 $O(\log n)$。
+
+- 空间复杂度：O(1)。
+
+
