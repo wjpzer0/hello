@@ -1,0 +1,294 @@
+# 题目
+
+给定一个字符串 `queryIP`。如果是有效的 IPv4 地址，返回 `"IPv4"` ；如果是有效的 IPv6 地址，返回 `"IPv6"` ；如果不是上述类型的 IP 地址，返回 `"Neither"` 。
+
+**有效的IPv4地址** 是 `“x1.x2.x3.x4”` 形式的IP地址。 其中 `0 <= xi <= 255` 且 `xi` **不能包含** 前导零。例如: `“192.168.1.1”` 、 `“192.168.1.0”` 为有效IPv4地址， `“192.168.01.1”` 为无效IPv4地址; `“192.168.1.00”` 、 `“192.168@1.1”` 为无效IPv4地址。
+
+**一个有效的IPv6地址** 是一个格式为`“x1:x2:x3:x4:x5:x6:x7:x8”` 的IP地址，其中:
+
+- `1 <= xi.length <= 4`
+- `xi` 是一个 **十六进制字符串** ，可以包含数字、小写英文字母( `'a'` 到 `'f'` )和大写英文字母( `'A'` 到 `'F'` )。
+- 在 `xi` 中允许前导零。
+
+例如 `"2001:0db8:85a3:0000:0000:8a2e:0370:7334"` 和 `"2001:db8:85a3:0:0:8A2E:0370:7334"` 是有效的 IPv6 地址，而 `"2001:0db8:85a3::8A2E:037j:7334"` 和 `"02001:0db8:85a3:0000:0000:8a2e:0370:7334"` 是无效的 IPv6 地址。
+
+ 
+
+**示例 1：**
+
+```
+输入：queryIP = "172.16.254.1"
+输出："IPv4"
+解释：有效的 IPv4 地址，返回 "IPv4"
+```
+
+**示例 2：**
+
+```
+输入：queryIP = "2001:0db8:85a3:0:0:8A2E:0370:7334"
+输出："IPv6"
+解释：有效的 IPv6 地址，返回 "IPv6"
+```
+
+**示例 3：**
+
+```
+输入：queryIP = "256.256.256.256"
+输出："Neither"
+解释：既不是 IPv4 地址，又不是 IPv6 地址
+```
+
+**提示：**
+
+- `queryIP` 仅由英文字母，数字，字符 `'.'` 和 `':'` 组成。
+
+## 我的解法
+
+代码不够优雅！
+
+```python
+class Solution:
+    def validIPAddress(self, queryIP: str) -> str:
+        if '.' in queryIP:
+            iplist = queryIP.split('.')
+            n = len(iplist)
+            if n == 4:
+                for ip in iplist:
+                    if len(ip) == 0:
+                        return "Neither"
+                    if ip[0] == '0' and len(ip) > 1:
+                        return "Neither"
+                    flag = ip.isdigit( )
+                    if flag:
+                        if int(ip) > 255:
+                            return "Neither"
+                    else:
+                        return "Neither"
+                return "IPv4"
+            else:
+                return "Neither"
+        elif ':' in queryIP:
+            iplist = queryIP.split(':')
+            n = len(iplist)
+            if n == 8:
+                for ip in iplist:
+                    ipl = len(ip)
+                    if ipl > 4 or ipl < 1:
+                        return "Neither"
+                    for i in ip:
+                        if not i.isdigit():
+                            if i.lower() > 'f' :
+                                return "Neither"
+                return "IPv6"
+            else:
+                return "Neither"
+        else:
+            return "Neither"
+```
+
+## 其他解法
+
+### 依次判断
+
+```c++
+class Solution:
+    def validIPAddress(self, queryIP: str) -> str:
+        if queryIP.find(".") != -1:
+            # IPv4
+            last = -1
+            for i in range(4):
+                cur = (len(queryIP) if i == 3 else queryIP.find(".", last + 1))
+                if cur == -1:
+                    return "Neither"
+                if not 1 <= cur - last - 1 <= 3:
+                    return "Neither"
+                
+                addr = 0
+                for j in range(last + 1, cur):
+                    if not queryIP[j].isdigit():
+                        return "Neither"
+                    addr = addr * 10 + int(queryIP[j])
+                
+                if addr > 255:
+                    return "Neither"
+                if addr > 0 and queryIP[last + 1] == "0":
+                    return "Neither"
+                if addr == 0 and cur - last - 1 > 1:
+                    return "Neither"
+                
+                last = cur
+            
+            return "IPv4"
+        else:
+            # IPv6
+            last = -1
+            for i in range(8):
+                cur = (len(queryIP) if i == 7 else queryIP.find(":", last + 1))
+                if cur == -1:
+                    return "Neither"
+                if not 1 <= cur - last - 1 <= 4:
+                    return "Neither"
+
+                for j in range(last + 1, cur):
+                    if not queryIP[j].isdigit() and not("a" <= queryIP[j].lower() <= "f"):
+                        return "Neither"
+                
+                last = cur
+            
+            return "IPv6"
+```
+
+```java
+class Solution {
+    public String validIPAddress(String queryIP) {
+        if (queryIP.indexOf('.') >= 0) {
+            // IPv4
+            int last = -1;
+            for (int i = 0; i < 4; ++i) {
+                int cur = (i == 3 ? queryIP.length() : queryIP.indexOf('.', last + 1));
+                if (cur < 0) {
+                    return "Neither";
+                }
+                if (cur - last - 1 < 1 || cur - last - 1 > 3) {
+                    return "Neither";
+                }
+                int addr = 0;
+                for (int j = last + 1; j < cur; ++j) {
+                    if (!Character.isDigit(queryIP.charAt(j))) {
+                        return "Neither";
+                    }
+                    addr = addr * 10 + (queryIP.charAt(j) - '0');
+                }
+                if (addr > 255) {
+                    return "Neither";
+                }
+                if (addr > 0 && queryIP.charAt(last + 1) == '0') {
+                    return "Neither";
+                }
+                if (addr == 0 && cur - last - 1 > 1) {
+                    return "Neither";
+                }
+                last = cur;
+            }
+            return "IPv4";
+        } else {
+            // IPv6
+            int last = -1;
+            for (int i = 0; i < 8; ++i) {
+                int cur = (i == 7 ? queryIP.length() : queryIP.indexOf(':', last + 1));
+                if (cur < 0) {
+                    return "Neither";
+                }
+                if (cur - last - 1 < 1 || cur - last - 1 > 4) {
+                    return "Neither";
+                }
+                for (int j = last + 1; j < cur; ++j) {
+                    if (!Character.isDigit(queryIP.charAt(j)) && !('a' <= Character.toLowerCase(queryIP.charAt(j)) && Character.toLowerCase(queryIP.charAt(j)) <= 'f')) {
+                        return "Neither";
+                    }
+                }
+                last = cur;
+            }
+            return "IPv6";
+        }
+    }
+}
+```
+
+```python
+class Solution:
+    def validIPAddress(self, queryIP: str) -> str:
+        if queryIP.find(".") != -1:
+            # IPv4
+            last = -1
+            for i in range(4):
+                cur = (len(queryIP) if i == 3 else queryIP.find(".", last + 1))
+                if cur == -1:
+                    return "Neither"
+                if not 1 <= cur - last - 1 <= 3:
+                    return "Neither"
+                
+                addr = 0
+                for j in range(last + 1, cur):
+                    if not queryIP[j].isdigit():
+                        return "Neither"
+                    addr = addr * 10 + int(queryIP[j])
+                
+                if addr > 255:
+                    return "Neither"
+                if addr > 0 and queryIP[last + 1] == "0":
+                    return "Neither"
+                if addr == 0 and cur - last - 1 > 1:
+                    return "Neither"
+                
+                last = cur
+            
+            return "IPv4"
+        else:
+            # IPv6
+            last = -1
+            for i in range(8):
+                cur = (len(queryIP) if i == 7 else queryIP.find(":", last + 1))
+                if cur == -1:
+                    return "Neither"
+                if not 1 <= cur - last - 1 <= 4:
+                    return "Neither"
+
+                for j in range(last + 1, cur):
+                    if not queryIP[j].isdigit() and not("a" <= queryIP[j].lower() <= "f"):
+                        return "Neither"
+                
+                last = cur
+            
+            return "IPv6"
+```
+
+#### 思路与算法
+
+我们首先查找给定的字符串 $\textit{queryIP}$中是否包含符号 $\text{‘.’}$。如果包含，那么我们需要判断其是否为 IPv4 地址；如果不包含，我们则判断其是否为 IPv6 地址。
+
+对于 IPv4 地址而言，它包含 4 个部分，用 $\text{‘.’}$ 隔开。因此我们可以存储相邻两个 $\text{‘.’}$ 出现的位置 $\textit{last}$和$ \textit{cur}$（当考虑首个部分时，$\textit{last}=-1$；当考虑最后一个部分时，$\textit{cur}=n$，其中 n 是字符串的长度），那么子串 $\textit{queryIP}[\textit{last}+1..\textit{cur}-1]$ 就对应着一个部分。我们需要判断：
+
+它的长度是否在 $[1, 3]$ 之间（虽然这一步没有显式要求，但提前判断可以防止后续计算值时 32 位整数无法表示的情况）；
+
+- 它是否只包含数字；
+- 它的值是否在 $[0, 255]$ 之间；
+- 它是否不包含前导零。具体地，如果它的值为 0，那么该部分只能包含一个 0，即 $(\textit{cur}-1) - (\textit{last}+1) + 1 = 1$；如果它的值不为 0，那么该部分的第一个数字不能为 0，即$ \textit{queryIP}[\textit{last}+1]$ 不为 0。
+
+
+对于 IPv6 地址而言，它包含 8 个部分，用 $\text{‘:’}$ 隔开。同样地，我们可以存储相邻两个 $\text{‘:’}$ 出现的位置 $\textit{last}$和 $\textit{cur}$，那么子串 $\textit{queryIP}[\textit{last}+1..\textit{cur}-1]$ 就对应着一个部分。我们需要判断：
+
+- 它的长度是否在 $[1, 4]$ 之间；
+
+- 它是否只包含数字，或者 $\text{a-f}$，或者 $\text{A-F}$；
+
+
+除了上述情况以外，如果我们无法找到对应数量的部分，那么给定的字符串也不是一个有效的 IP 地址。
+
+#### 复杂度分析
+
+- 时间复杂度：O(n)，其中 n 是字符串$ \textit{queryIP}$的长度。我们只需要遍历字符串常数次。
+
+- 空间复杂度：O(1)。
+
+### 正则表达式
+
+```python
+class Solution:
+    def validIPAddress(self, queryIP: str) -> str:
+        ipv4 = queryIP.split(".")
+        ipv6 = queryIP.split(":")
+        if len(ipv4) == 4:
+            if all(re.match(r"^0$|^([1-9]\d{0,2})$", part) and int(part) < 256 for part in ipv4):
+                return "IPv4"
+        elif len(ipv6) == 8:
+            if all(re.match(r"^[0-9a-fA-F]{1,4}$", part) for part in ipv6):
+                return "IPv6"
+        return "Neither"
+```
+
+正则匹配判断即可：
+
+IPv6 直接判断8组数均为4位包含数字、小写英文字母( 'a' 到 'f' )和大写英文字母( 'A' 到 'F' ) `^[0-9a-fA-F]{1,4}$`
+IPv4 一位数0 1-9 以及两位数和三位数，`^0$|^([1-9]\d{0,2})$`，再判断数字是否小于256即可
+
