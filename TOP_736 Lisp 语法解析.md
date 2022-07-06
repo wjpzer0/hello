@@ -728,10 +728,11 @@ class Solution:
 
 状态机有两种转换路线，第一种是从 $\text{VALUE}$到$ \text{DONE}$的转换路线，第二种是从 $\text{NONE}$到 $\text{LET2}$，$\text{ADD2}$或 $\text{MULT2}$的转换路线。
 
+![状态机转换图](https://assets.leetcode-cn.com/solution-static/736/1.jpg)
+
 #### 复杂度分析
 
 - 时间复杂度：O(n)，其中 n 是字符串 $\textit{expression}$的长度。状态机解析会遍历整个字符串，因此需要 O(n)的时间。
 
 - 空间复杂度：O(n)。保存状态的栈以及作用域变量都需要 O(n) 的空间。
-
 
